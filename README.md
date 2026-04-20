@@ -1,10 +1,17 @@
-## unimcp
+<h1 align="center">Unimcp</h1>
 
-Generic codebase-awareness MCP server. Drop into any project (PHP, TypeScript, Python, Go, Ruby, Java, Rust) and give Claude Code, Gemini, or any other MCP client a consistent set of tools for exploring code, symbols, and framework-specific structure.
+<p align="center">
+  <img src="resources/img/unimcp.png" alt="unimcp" width="200" />
+</p>
+
+<p align="center">
+  Generic codebase-awareness MCP server. Drop into any project (PHP, TypeScript, Python, Go, Ruby, Java, Rust) and give Claude Code, Gemini, or any other MCP client a consistent set of tools for exploring code, symbols, and framework-specific structure.
+</p>
 
 ### What it gives the agent
 
 **Generic core (always on)**
+
 - `read_file` — paginated by line
 - `list_directory` — recursive, paginated
 - `search_files` — regex + glob
@@ -14,9 +21,11 @@ Generic codebase-awareness MCP server. Drop into any project (PHP, TypeScript, P
 - `find_references` — identifier-level usage search
 
 **Write tools (opt-in via `--allow-writes`)**
+
 - `write_file`, `delete_file`, `create_directory`, `move_file` — all jailed to project root
 
 **Plugins (auto-loaded when their marker file is present)**
+
 - `php-composer` (when `composer.json` exists): `list_php_classes`, `find_php_class`, `list_composer_packages`
 
 ### Install & run
@@ -41,11 +50,11 @@ Or wire it into your MCP client config:
 
 ### CLI flags
 
-| Flag | Description |
-| --- | --- |
-| `--root <path>` | Project root the server is jailed to. Defaults to `$MCP_ROOT` or `cwd`. |
-| `--allow-writes` | Enable mutation tools. Off by default. |
-| `--config <path>` | Path to `unimcp.config.json`. Defaults to `<root>/unimcp.config.json`. |
+| Flag              | Description                                                             |
+| ----------------- | ----------------------------------------------------------------------- |
+| `--root <path>`   | Project root the server is jailed to. Defaults to `$MCP_ROOT` or `cwd`. |
+| `--allow-writes`  | Enable mutation tools. Off by default.                                  |
+| `--config <path>` | Path to `unimcp.config.json`. Defaults to `<root>/unimcp.config.json`.  |
 
 ### Optional `unimcp.config.json`
 
