@@ -1,0 +1,31 @@
+{
+  "name": "unimcp",
+  "version": "0.1.0",
+  "description": "Generic codebase-awareness MCP server. Drop into any PHP/TS/Python project to give agents file, symbol, and framework-aware context.",
+  "module": "src/index.ts",
+  "main": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "unimcp": "src/mcp/cli.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "check": "bunx tsc --noEmit --downlevelIteration",
+    "start": "bun src/mcp/cli.ts",
+    "mcp": "bun src/mcp/cli.ts",
+    "help": "bun src/mcp/cli.ts --help"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "tree-sitter-wasms": "^0.1.13",
+    "web-tree-sitter": "0.25.10",
+    "zod": "^4.3.6"
+  }
+}

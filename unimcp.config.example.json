@@ -1,0 +1,5 @@
+{
+  "docDirs": ["docs", ".claude/rules", ".cursor/rules"],
+  "ignoreDirs": ["node_modules", ".git", "vendor", "__pycache__", ".venv", "dist", "build"],
+  "pluginsDisabled": []
+}
