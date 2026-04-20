@@ -1,4 +1,4 @@
-<h1 align="center">Unimcp</h1>
+<h1 align="center">UniMCP</h1>
 
 <p align="center">
   <img src="resources/img/unimcp.png" alt="unimcp" width="200" />
