@@ -30,9 +30,26 @@
 
 ### Install & run
 
+> Not yet published to npm — install directly from this repo.
+
 ```bash
-# from inside the project you want to expose
-npx unimcp --root . --allow-writes
+# Bun (recommended — the CLI ships as TypeScript)
+bun add github:Rockberpro/unimcp
+
+# npm also works, but you'll need Bun (or tsx/ts-node) to actually run it
+npm i github:Rockberpro/unimcp
+```
+
+You can pin a branch, tag, or commit:
+
+```bash
+bun add github:Rockberpro/unimcp#main
+```
+
+Run it from inside the project you want to expose:
+
+```bash
+bunx unimcp --root . --allow-writes
 ```
 
 Or wire it into your MCP client config:
@@ -41,11 +58,17 @@ Or wire it into your MCP client config:
 {
   "mcpServers": {
     "unimcp": {
-      "command": "npx",
+      "command": "bunx",
       "args": ["unimcp", "--root", "/absolute/path/to/project"]
     }
   }
 }
+```
+
+If you prefer not to depend on Bun, run the CLI file directly via your TS runner of choice:
+
+```bash
+node --import tsx node_modules/unimcp/src/mcp/cli.ts --root .
 ```
 
 ### CLI flags
