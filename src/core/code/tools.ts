@@ -8,7 +8,7 @@ import { LANGUAGES, languageForFile, languageById, type LanguageDef } from "./la
 import type { Symbol, SymbolKind } from "./symbols.js";
 import { findReferences } from "./references.js";
 
-const KIND_VALUES = ["class", "interface", "method", "function"] as const;
+const KIND_VALUES = ["class", "interface", "method", "function", "enum", "type", "struct", "trait", "module", "constant"] as const;
 
 async function symbolsForPath(
   ctx: ServerContext,
