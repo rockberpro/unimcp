@@ -8,12 +8,14 @@ export interface UnimcpConfig {
   docDirs: string[];
   ignoreDirs: string[];
   pluginsDisabled: string[];
+  honorGitignore: boolean;
 }
 
 export interface UnimcpConfigFile {
   docDirs?: string[];
   ignoreDirs?: string[];
   pluginsDisabled?: string[];
+  honorGitignore?: boolean;
 }
 
 const DEFAULT_DOC_DIRS = ["docs", ".claude/rules", ".cursor/rules"];
@@ -45,5 +47,6 @@ export async function loadConfig(flags: CliFlags): Promise<UnimcpConfig> {
     docDirs: file.docDirs ?? DEFAULT_DOC_DIRS,
     ignoreDirs: file.ignoreDirs ?? DEFAULT_IGNORE_DIRS,
     pluginsDisabled: file.pluginsDisabled ?? [],
+    honorGitignore: file.honorGitignore ?? true,
   };
 }

@@ -28,7 +28,7 @@ export class Logger {
 
 function makeCtx(root: string): ServerContext {
   return {
-    config: { root, ignoreDirs: [], allowWrites: false },
+    config: { root, ignoreDirs: [], allowWrites: false, honorGitignore: true },
     jail: createJail(root),
     symbolCache: new SymbolCache(),
   };
