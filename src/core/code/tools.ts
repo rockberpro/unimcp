@@ -1,5 +1,4 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import type { ServerContext } from "../../mcp/context.js";
 import { errorResult, textResult } from "../../mcp/errors.js";
@@ -7,6 +6,7 @@ import { DEFAULT_PAGE_SIZE, paginate, formatPageFooter } from "../../mcp/paginat
 import { walkFiles, globToRegex } from "../tools/walk.js";
 import { LANGUAGES, languageForFile, languageById, type LanguageDef } from "./languages.js";
 import type { Symbol, SymbolKind } from "./symbols.js";
+import { findReferences } from "./references.js";
 
 const KIND_VALUES = ["class", "interface", "method", "function"] as const;
 
@@ -143,16 +143,12 @@ export function registerCodeTools(server: McpServer, ctx: ServerContext): void {
             return languageForFile(rel) !== null;
           },
         });
-        const regex = new RegExp(`\\b${name}\\b`);
         const all: string[] = [];
-        await Promise.all(files.map(async (file) => {
-          const text = await readFile(file, "utf8").catch(() => null);
-          if (text === null) return;
-          const lines = text.split(/\r?\n/);
-          const rel = ctx.jail.relative(file);
-          for (let i = 0; i < lines.length; i++) {
-            if (regex.test(lines[i])) all.push(`${rel}:${i + 1}: ${lines[i].trim()}`);
-          }
+        await Promise.all(files.map(async (abs) => {
+          const lang = languageForFile(abs);
+          if (!lang) return;
+          const refs = await findReferences(abs, ctx.jail.relative(abs), lang, name);
+          for (const r of refs) all.push(`${r.file}:${r.line}: ${r.text}`);
         }));
         if (all.length === 0) return textResult(`No references found for '${name}'.`);
         const page = paginate(all, offset, limit);
