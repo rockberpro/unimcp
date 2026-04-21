@@ -5,6 +5,7 @@ import { createJail } from "./jail.js";
 import { registerCoreTools } from "../core/tools/index.js";
 import { registerCodeTools } from "../core/code/tools.js";
 import { detectAndLoadPlugins } from "../adapters/detect.js";
+import { SymbolCache } from "../core/code/cache.js";
 import type { ServerContext } from "./context.js";
 
 export async function startServer(flags: CliFlags): Promise<void> {
@@ -28,7 +29,7 @@ export async function startServer(flags: CliFlags): Promise<void> {
     },
   );
 
-  const ctx: ServerContext = { config, jail };
+  const ctx: ServerContext = { config, jail, symbolCache: new SymbolCache() };
 
   registerCoreTools(server, ctx);
   registerCodeTools(server, ctx);
