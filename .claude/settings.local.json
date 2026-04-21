@@ -3,7 +3,8 @@
     "allow": [
       "Bash(bun run *)",
       "Bash(bunx npm *)",
-      "Bash(bun test *)"
+      "Bash(bun test *)",
+      "Bash(node -e ' *)"
     ]
   }
 }

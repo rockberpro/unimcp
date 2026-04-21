@@ -1,4 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import type { ServerContext } from "../../mcp/context.js";
 import { errorResult, textResult } from "../../mcp/errors.js";
@@ -155,6 +156,49 @@ export function registerCodeTools(server: McpServer, ctx: ServerContext): void {
         return textResult(page.items.join("\n") + formatPageFooter(page));
       } catch (err) {
         return errorResult("Error finding references", err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "get_symbol_body",
+    {
+      description:
+        "Return the full source body of a named symbol. Uses the symbol index to locate the definition, then returns its source slice with a file:startLine-endLine header. If multiple symbols match, all are returned.",
+      inputSchema: {
+        name: z.string().describe("Symbol name (exact match)"),
+        path: z.string().optional().describe("File or directory to search (defaults to jail root)"),
+        kind: z.enum(KIND_VALUES).optional(),
+        lang: z.string().optional().describe("Restrict to one language id (e.g. 'typescript')"),
+      },
+    },
+    async ({ name, path: inputPath, kind, lang }) => {
+      try {
+        const langDef = lang ? languageById(lang) : null;
+        if (lang && !langDef) {
+          return errorResult("Unknown language", new Error(`'${lang}' — known: ${LANGUAGES.map((l) => l.id).join(", ")}`));
+        }
+        const searchRoot = inputPath ?? ctx.jail.root;
+        const symbols = await symbolsForPath(ctx, searchRoot, kind, undefined);
+        const matches = symbols.filter(
+          (s) => s.name === name && (!langDef || languageForFile(s.file)?.id === langDef.id),
+        );
+        if (matches.length === 0) return textResult(`No symbol '${name}' found.`);
+
+        const parts = await Promise.all(
+          matches.map(async (s) => {
+            const abs = ctx.jail.assertInside(s.file);
+            const source = await readFile(abs, "utf8").catch(() => null);
+            if (!source) return null;
+            const lines = source.split(/\r?\n/);
+            const body = lines.slice(s.line - 1, s.endLine).join("\n");
+            return `${s.file}:${s.line}-${s.endLine}\n${body}`;
+          }),
+        );
+
+        return textResult(parts.filter((p): p is string => p !== null).join("\n\n"));
+      } catch (err) {
+        return errorResult("Error getting symbol body", err);
       }
     },
   );
