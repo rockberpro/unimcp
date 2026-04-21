@@ -34,16 +34,16 @@
 
 ```bash
 # Bun (recommended — the CLI ships as TypeScript)
-bun add github:Rockberpro/unimcp
+bun add github:rockberpro/unimcp
 
 # npm also works, but you'll need Bun (or tsx/ts-node) to actually run it
-npm i github:Rockberpro/unimcp
+npm i github:rockberpro/unimcp
 ```
 
 You can pin a branch, tag, or commit:
 
 ```bash
-bun add github:Rockberpro/unimcp#main
+bun add github:rockberpro/unimcp#main
 ```
 
 Run it from inside the project you want to expose:
