@@ -13,6 +13,7 @@ export interface LanguageDef {
     traits?: string;
     modules?: string;
     constants?: string;
+    imports?: string;
     refs?: string;
   };
 }
@@ -30,6 +31,10 @@ export const LANGUAGES: LanguageDef[] = [
       enums: "(enum_declaration name: (name) @name) @def",
       traits: "(trait_declaration name: (name) @name) @def",
       constants: "(const_element (name) @name @def)",
+      imports: [
+        "(namespace_use_clause (qualified_name) @source (namespace_aliasing_clause (name) @name))",
+        "(namespace_use_clause (qualified_name) @source)",
+      ].join("\n"),
       refs: "(name) @ref",
     },
   },
@@ -47,6 +52,12 @@ export const LANGUAGES: LanguageDef[] = [
       constants: [
         "(program (lexical_declaration \"const\" (variable_declarator name: (identifier) @name) @def))",
         "(program (export_statement (lexical_declaration \"const\" (variable_declarator name: (identifier) @name) @def)))",
+      ].join("\n"),
+      imports: [
+        "(import_statement (import_clause (named_imports (import_specifier name: (identifier) @name))) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (named_imports (import_specifier alias: (identifier) @name))) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (identifier) @name) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (namespace_import (identifier) @name)) source: (string (string_fragment) @source))",
       ].join("\n"),
       refs: "[(identifier) (type_identifier) (property_identifier)] @ref",
     },
@@ -66,6 +77,12 @@ export const LANGUAGES: LanguageDef[] = [
         "(program (lexical_declaration \"const\" (variable_declarator name: (identifier) @name) @def))",
         "(program (export_statement (lexical_declaration \"const\" (variable_declarator name: (identifier) @name) @def)))",
       ].join("\n"),
+      imports: [
+        "(import_statement (import_clause (named_imports (import_specifier name: (identifier) @name))) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (named_imports (import_specifier alias: (identifier) @name))) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (identifier) @name) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (namespace_import (identifier) @name)) source: (string (string_fragment) @source))",
+      ].join("\n"),
       refs: "[(identifier) (type_identifier) (property_identifier)] @ref",
     },
   },
@@ -81,6 +98,12 @@ export const LANGUAGES: LanguageDef[] = [
         "(program (lexical_declaration \"const\" (variable_declarator name: (identifier) @name) @def))",
         "(program (export_statement (lexical_declaration \"const\" (variable_declarator name: (identifier) @name) @def)))",
       ].join("\n"),
+      imports: [
+        "(import_statement (import_clause (named_imports (import_specifier name: (identifier) @name))) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (named_imports (import_specifier alias: (identifier) @name))) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (identifier) @name) source: (string (string_fragment) @source))",
+        "(import_statement (import_clause (namespace_import (identifier) @name)) source: (string (string_fragment) @source))",
+      ].join("\n"),
       refs: "[(identifier) (property_identifier)] @ref",
     },
   },
@@ -91,6 +114,11 @@ export const LANGUAGES: LanguageDef[] = [
     queries: {
       classes: "(class_definition name: (identifier) @name) @def",
       functions: "(function_definition name: (identifier) @name) @def",
+      imports: [
+        "(import_from_statement module_name: (dotted_name) @source name: (dotted_name) @name)",
+        "(import_from_statement module_name: (dotted_name) @source (aliased_import alias: (identifier) @name))",
+        "(import_statement name: (dotted_name) @name)",
+      ].join("\n"),
       refs: "(identifier) @ref",
     },
   },
@@ -103,6 +131,10 @@ export const LANGUAGES: LanguageDef[] = [
       methods: "(method_declaration name: (field_identifier) @name) @def",
       structs: "(type_spec name: (type_identifier) @name type: (struct_type)) @def",
       constants: "(const_declaration (const_spec name: (identifier) @name) @def)",
+      imports: [
+        "(import_spec name: (package_identifier) @name path: (interpreted_string_literal) @source)",
+        "(import_spec path: (interpreted_string_literal) @source)",
+      ].join("\n"),
       refs: "[(identifier) (field_identifier) (type_identifier)] @ref",
     },
   },
@@ -141,6 +173,7 @@ export const LANGUAGES: LanguageDef[] = [
       traits: "(trait_item name: (type_identifier) @name) @def",
       modules: "(mod_item name: (identifier) @name) @def",
       constants: "(const_item name: (identifier) @name) @def",
+      imports: "(use_declaration argument: (_) @source)",
       refs: "[(identifier) (type_identifier)] @ref",
     },
   },

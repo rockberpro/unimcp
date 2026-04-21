@@ -8,6 +8,7 @@ import { walkFiles, globToRegex } from "../tools/walk.js";
 import { LANGUAGES, languageForFile, languageById, type LanguageDef } from "./languages.js";
 import type { Symbol, SymbolKind } from "./symbols.js";
 import { findReferences } from "./references.js";
+import { listImports } from "./imports.js";
 
 const KIND_VALUES = ["class", "interface", "method", "function", "enum", "type", "struct", "trait", "module", "constant"] as const;
 
@@ -199,6 +200,54 @@ export function registerCodeTools(server: McpServer, ctx: ServerContext): void {
         return textResult(parts.filter((p): p is string => p !== null).join("\n\n"));
       } catch (err) {
         return errorResult("Error getting symbol body", err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "list_imports",
+    {
+      description:
+        "List imports/dependencies for a file or all files in a directory. Uses tree-sitter to parse import/use statements — supports " +
+        LANGUAGES.filter((l) => l.queries.imports).map((l) => l.id).join(", ") + ".",
+      inputSchema: {
+        path: z.string().describe("File or directory inside the jail"),
+        glob: z.string().optional().describe("Glob filter when path is a directory, e.g. '**/*.ts'"),
+        offset: z.number().int().min(0).optional(),
+        limit: z.number().int().min(1).optional().describe(`Max rows (default ${DEFAULT_PAGE_SIZE})`),
+      },
+    },
+    async ({ path, glob, offset = 0, limit = DEFAULT_PAGE_SIZE }) => {
+      try {
+        const safe = ctx.jail.assertInside(path);
+        const stat = await import("node:fs/promises").then((m) => m.stat(safe));
+        const matcher = glob ? globToRegex(glob) : null;
+        const files: { abs: string; rel: string; lang: ReturnType<typeof languageForFile> }[] = [];
+
+        if (stat.isFile()) {
+          const lang = languageForFile(safe);
+          if (lang?.queries.imports) files.push({ abs: safe, rel: ctx.jail.relative(safe), lang });
+        } else {
+          const all = await walkFiles(safe, {
+            ignoreDirs: new Set(ctx.config.ignoreDirs),
+            match: (rel) => (matcher ? matcher.test(rel) : true),
+          });
+          for (const abs of all) {
+            const lang = languageForFile(abs);
+            if (lang?.queries.imports) files.push({ abs, rel: ctx.jail.relative(abs), lang });
+          }
+        }
+
+        const perFile = await Promise.all(
+          files.map(({ abs, rel, lang }) => listImports(abs, rel, lang!)),
+        );
+        const rows = perFile.flat().map((i) => `${i.file}: ${i.name}  from ${i.from}`);
+
+        if (rows.length === 0) return textResult("No imports found.");
+        const page = paginate(rows, offset, limit);
+        return textResult(page.items.join("\n") + formatPageFooter(page));
+      } catch (err) {
+        return errorResult("Error listing imports", err);
       }
     },
   );
