@@ -83,22 +83,27 @@ export function registerCodeTools(server: McpServer, ctx: ServerContext): void {
         "Find where a symbol (class/interface/method/function) is defined. Walks the project, parses with tree-sitter, returns matching definitions.",
       inputSchema: {
         name: z.string().describe("Symbol name to find (exact match)"),
+        path: z.string().optional().describe("Restrict search to this file or directory subtree (defaults to jail root)"),
         kind: z.enum(KIND_VALUES).optional(),
         lang: z.string().optional().describe("Restrict to one language id (e.g. 'php', 'typescript')"),
         glob: z.string().optional().describe("Optional glob filter"),
       },
     },
-    async ({ name, kind, lang, glob }) => {
+    async ({ name, path: inputPath, kind, lang, glob }) => {
       try {
         const langDef = lang ? languageById(lang) : null;
         if (lang && !langDef) {
           return errorResult("Unknown language", new Error(`'${lang}' — known: ${LANGUAGES.map((l) => l.id).join(", ")}`));
         }
+        const searchRoot = inputPath ? ctx.jail.assertInside(inputPath) : ctx.jail.root;
         const matcher = glob ? globToRegex(glob) : null;
-        const files = await walkFiles(ctx.jail.root, {
-          ignoreDirs: new Set(ctx.config.ignoreDirs),
-          match: (rel) => (matcher ? matcher.test(rel) : true),
-        });
+        const rootStat = await import("node:fs/promises").then((m) => m.stat(searchRoot));
+        const files = rootStat.isFile()
+          ? [searchRoot]
+          : await walkFiles(searchRoot, {
+              ignoreDirs: new Set(ctx.config.ignoreDirs),
+              match: (rel) => (matcher ? matcher.test(rel) : true),
+            });
         const targets = files
           .map((abs) => {
             const detected = languageForFile(abs);
