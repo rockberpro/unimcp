@@ -31,6 +31,7 @@ async function buildPsr4Index(ctx: ServerContext): Promise<{ roots: Psr4Root[]; 
     const files = await walkFiles(absDir, {
       ignoreDirs: new Set(ctx.config.ignoreDirs),
       match: (rel) => rel.endsWith(".php"),
+      honorGitignore: ctx.config.honorGitignore,
     });
     for (const abs of files) {
       const rel = ctx.jail.relative(abs);

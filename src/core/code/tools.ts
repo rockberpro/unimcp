@@ -30,6 +30,7 @@ async function symbolsForPath(
     const all = await walkFiles(safe, {
       ignoreDirs: new Set(ctx.config.ignoreDirs),
       match: (rel) => (matcher ? matcher.test(rel) : true),
+      honorGitignore: ctx.config.honorGitignore,
     });
     for (const abs of all) {
       const lang = languageForFile(abs);
@@ -103,6 +104,7 @@ export function registerCodeTools(server: McpServer, ctx: ServerContext): void {
           : await walkFiles(searchRoot, {
               ignoreDirs: new Set(ctx.config.ignoreDirs),
               match: (rel) => (matcher ? matcher.test(rel) : true),
+              honorGitignore: ctx.config.honorGitignore,
             });
         const targets = files
           .map((abs) => {
@@ -149,6 +151,7 @@ export function registerCodeTools(server: McpServer, ctx: ServerContext): void {
             if (matcher && !matcher.test(rel)) return false;
             return languageForFile(rel) !== null;
           },
+          honorGitignore: ctx.config.honorGitignore,
         });
         const all: string[] = [];
         await Promise.all(files.map(async (abs) => {
@@ -236,6 +239,7 @@ export function registerCodeTools(server: McpServer, ctx: ServerContext): void {
           const all = await walkFiles(safe, {
             ignoreDirs: new Set(ctx.config.ignoreDirs),
             match: (rel) => (matcher ? matcher.test(rel) : true),
+            honorGitignore: ctx.config.honorGitignore,
           });
           for (const abs of all) {
             const lang = languageForFile(abs);
