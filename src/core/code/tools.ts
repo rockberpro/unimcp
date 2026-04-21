@@ -6,7 +6,7 @@ import { errorResult, textResult } from "../../mcp/errors.js";
 import { DEFAULT_PAGE_SIZE, paginate, formatPageFooter } from "../../mcp/pagination.js";
 import { walkFiles, globToRegex } from "../tools/walk.js";
 import { LANGUAGES, languageForFile, languageById, type LanguageDef } from "./languages.js";
-import { extractSymbols, type Symbol, type SymbolKind } from "./symbols.js";
+import type { Symbol, SymbolKind } from "./symbols.js";
 
 const KIND_VALUES = ["class", "interface", "method", "function"] as const;
 
@@ -36,7 +36,7 @@ async function symbolsForPath(
   }
 
   const perFile = await Promise.all(
-    files.map(({ abs, rel, lang }) => extractSymbols(abs, rel, lang, kind)),
+    files.map(({ abs, rel, lang }) => ctx.symbolCache.get(abs, rel, lang, kind)),
   );
   return perFile.flat();
 }
@@ -107,7 +107,7 @@ export function registerCodeTools(server: McpServer, ctx: ServerContext): void {
           .filter((x): x is { abs: string; lang: LanguageDef } => x !== null);
 
         const perFile = await Promise.all(
-          targets.map(({ abs, lang }) => extractSymbols(abs, ctx.jail.relative(abs), lang, kind)),
+          targets.map(({ abs, lang }) => ctx.symbolCache.get(abs, ctx.jail.relative(abs), lang, kind)),
         );
         const matches = perFile.flat().filter((s) => s.name === name);
         if (matches.length === 0) return textResult(`No definition found for '${name}'.`);
