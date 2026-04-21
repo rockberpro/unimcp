@@ -3,7 +3,7 @@ import { Query } from "web-tree-sitter";
 import type { LanguageDef } from "./languages.js";
 import { loadLanguage, parserFor } from "./treesitter.js";
 
-export type SymbolKind = "class" | "interface" | "method" | "function";
+export type SymbolKind = "class" | "interface" | "method" | "function" | "enum" | "type" | "struct" | "trait" | "module" | "constant";
 
 export interface Symbol {
   name: string;
@@ -19,6 +19,12 @@ const KIND_QUERIES: Array<[SymbolKind, keyof LanguageDef["queries"]]> = [
   ["interface", "interfaces"],
   ["method", "methods"],
   ["function", "functions"],
+  ["enum", "enums"],
+  ["type", "types"],
+  ["struct", "structs"],
+  ["trait", "traits"],
+  ["module", "modules"],
+  ["constant", "constants"],
 ];
 
 export async function extractSymbols(

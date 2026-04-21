@@ -78,3 +78,172 @@ describe("extractSymbols", () => {
     expect(result).toEqual([]);
   });
 });
+
+// ── New symbol kinds ──────────────────────────────────────────────────────────
+
+const TS_NEW_KINDS = `
+enum Direction { Up, Down }
+type UserId = string;
+const MAX_RETRIES = 3;
+export const API_URL = "https://example.com";
+`.trimStart();
+
+describe("expanded symbol kinds (TypeScript)", () => {
+  test("enum", async () => {
+    const file = await tmpFile("kinds.ts", TS_NEW_KINDS);
+    const lang = languageById("typescript")!;
+    const syms = await extractSymbols(file, "kinds.ts", lang, "enum");
+    expect(syms.map((s) => s.name)).toContain("Direction");
+  });
+
+  test("type alias", async () => {
+    const file = await tmpFile("kinds.ts", TS_NEW_KINDS);
+    const lang = languageById("typescript")!;
+    const syms = await extractSymbols(file, "kinds.ts", lang, "type");
+    expect(syms.map((s) => s.name)).toContain("UserId");
+  });
+
+  test("top-level const (plain and exported)", async () => {
+    const file = await tmpFile("kinds.ts", TS_NEW_KINDS);
+    const lang = languageById("typescript")!;
+    const syms = await extractSymbols(file, "kinds.ts", lang, "constant");
+    const names = syms.map((s) => s.name);
+    expect(names).toContain("MAX_RETRIES");
+    expect(names).toContain("API_URL");
+  });
+});
+
+const PHP_NEW_KINDS = `<?php
+enum Status { case Active; case Inactive; }
+trait Loggable { public function log(): void {} }
+const VERSION = "1.0";
+`;
+
+describe("expanded symbol kinds (PHP)", () => {
+  test("enum", async () => {
+    const file = await tmpFile("kinds.php", PHP_NEW_KINDS);
+    const lang = languageById("php")!;
+    const syms = await extractSymbols(file, "kinds.php", lang, "enum");
+    expect(syms.map((s) => s.name)).toContain("Status");
+  });
+
+  test("trait", async () => {
+    const file = await tmpFile("kinds.php", PHP_NEW_KINDS);
+    const lang = languageById("php")!;
+    const syms = await extractSymbols(file, "kinds.php", lang, "trait");
+    expect(syms.map((s) => s.name)).toContain("Loggable");
+  });
+
+  test("constant", async () => {
+    const file = await tmpFile("kinds.php", PHP_NEW_KINDS);
+    const lang = languageById("php")!;
+    const syms = await extractSymbols(file, "kinds.php", lang, "constant");
+    expect(syms.map((s) => s.name)).toContain("VERSION");
+  });
+});
+
+const GO_NEW_KINDS = `package main
+
+type Point struct {
+	X, Y float64
+}
+
+const MaxSize = 100
+`;
+
+describe("expanded symbol kinds (Go)", () => {
+  test("struct", async () => {
+    const file = await tmpFile("kinds.go", GO_NEW_KINDS);
+    const lang = languageById("go")!;
+    const syms = await extractSymbols(file, "kinds.go", lang, "struct");
+    expect(syms.map((s) => s.name)).toContain("Point");
+  });
+
+  test("constant", async () => {
+    const file = await tmpFile("kinds.go", GO_NEW_KINDS);
+    const lang = languageById("go")!;
+    const syms = await extractSymbols(file, "kinds.go", lang, "constant");
+    expect(syms.map((s) => s.name)).toContain("MaxSize");
+  });
+});
+
+const RUST_NEW_KINDS = `
+enum Color { Red, Green, Blue }
+type Meters = f64;
+struct Point { x: f64, y: f64 }
+trait Drawable { fn draw(&self); }
+mod utils {}
+const PI: f64 = 3.14159;
+`.trimStart();
+
+describe("expanded symbol kinds (Rust)", () => {
+  test("enum", async () => {
+    const file = await tmpFile("kinds.rs", RUST_NEW_KINDS);
+    const lang = languageById("rust")!;
+    const syms = await extractSymbols(file, "kinds.rs", lang, "enum");
+    expect(syms.map((s) => s.name)).toContain("Color");
+  });
+
+  test("type alias", async () => {
+    const file = await tmpFile("kinds.rs", RUST_NEW_KINDS);
+    const lang = languageById("rust")!;
+    const syms = await extractSymbols(file, "kinds.rs", lang, "type");
+    expect(syms.map((s) => s.name)).toContain("Meters");
+  });
+
+  test("struct", async () => {
+    const file = await tmpFile("kinds.rs", RUST_NEW_KINDS);
+    const lang = languageById("rust")!;
+    const syms = await extractSymbols(file, "kinds.rs", lang, "struct");
+    expect(syms.map((s) => s.name)).toContain("Point");
+  });
+
+  test("trait", async () => {
+    const file = await tmpFile("kinds.rs", RUST_NEW_KINDS);
+    const lang = languageById("rust")!;
+    const syms = await extractSymbols(file, "kinds.rs", lang, "trait");
+    expect(syms.map((s) => s.name)).toContain("Drawable");
+  });
+
+  test("module", async () => {
+    const file = await tmpFile("kinds.rs", RUST_NEW_KINDS);
+    const lang = languageById("rust")!;
+    const syms = await extractSymbols(file, "kinds.rs", lang, "module");
+    expect(syms.map((s) => s.name)).toContain("utils");
+  });
+
+  test("constant", async () => {
+    const file = await tmpFile("kinds.rs", RUST_NEW_KINDS);
+    const lang = languageById("rust")!;
+    const syms = await extractSymbols(file, "kinds.rs", lang, "constant");
+    expect(syms.map((s) => s.name)).toContain("PI");
+  });
+});
+
+const RUBY_MODULE = `
+module Payments
+  class Invoice; end
+end
+`.trimStart();
+
+describe("expanded symbol kinds (Ruby)", () => {
+  test("module", async () => {
+    const file = await tmpFile("kinds.rb", RUBY_MODULE);
+    const lang = languageById("ruby")!;
+    const syms = await extractSymbols(file, "kinds.rb", lang, "module");
+    expect(syms.map((s) => s.name)).toContain("Payments");
+  });
+});
+
+const JAVA_ENUM = `
+public enum Day { MON, TUE, WED }
+`.trimStart();
+
+describe("expanded symbol kinds (Java)", () => {
+  test("enum", async () => {
+    const file = await tmpFile("kinds.java", JAVA_ENUM);
+    const lang = languageById("java")!;
+    const syms = await extractSymbols(file, "kinds.java", lang, "enum");
+    expect(syms.map((s) => s.name)).toContain("Day");
+  });
+});
