@@ -7,6 +7,7 @@ export interface LanguageDef {
     functions?: string;
     methods?: string;
     interfaces?: string;
+    refs?: string;
   };
 }
 
@@ -20,6 +21,7 @@ export const LANGUAGES: LanguageDef[] = [
       interfaces: "(interface_declaration name: (name) @name) @def",
       methods: "(method_declaration name: (name) @name) @def",
       functions: "(function_definition name: (name) @name) @def",
+      refs: "(name) @ref",
     },
   },
   {
@@ -31,6 +33,7 @@ export const LANGUAGES: LanguageDef[] = [
       interfaces: "(interface_declaration name: (type_identifier) @name) @def",
       methods: "(method_definition name: (property_identifier) @name) @def",
       functions: "(function_declaration name: (identifier) @name) @def",
+      refs: "[(identifier) (type_identifier) (property_identifier)] @ref",
     },
   },
   {
@@ -42,6 +45,7 @@ export const LANGUAGES: LanguageDef[] = [
       interfaces: "(interface_declaration name: (type_identifier) @name) @def",
       methods: "(method_definition name: (property_identifier) @name) @def",
       functions: "(function_declaration name: (identifier) @name) @def",
+      refs: "[(identifier) (type_identifier) (property_identifier)] @ref",
     },
   },
   {
@@ -52,6 +56,7 @@ export const LANGUAGES: LanguageDef[] = [
       classes: "(class_declaration name: (identifier) @name) @def",
       methods: "(method_definition name: (property_identifier) @name) @def",
       functions: "(function_declaration name: (identifier) @name) @def",
+      refs: "[(identifier) (property_identifier)] @ref",
     },
   },
   {
@@ -61,6 +66,7 @@ export const LANGUAGES: LanguageDef[] = [
     queries: {
       classes: "(class_definition name: (identifier) @name) @def",
       functions: "(function_definition name: (identifier) @name) @def",
+      refs: "(identifier) @ref",
     },
   },
   {
@@ -70,6 +76,7 @@ export const LANGUAGES: LanguageDef[] = [
     queries: {
       functions: "(function_declaration name: (identifier) @name) @def",
       methods: "(method_declaration name: (field_identifier) @name) @def",
+      refs: "[(identifier) (field_identifier) (type_identifier)] @ref",
     },
   },
   {
@@ -79,6 +86,7 @@ export const LANGUAGES: LanguageDef[] = [
     queries: {
       classes: "(class name: (constant) @name) @def",
       methods: "(method name: (identifier) @name) @def",
+      refs: "[(identifier) (constant)] @ref",
     },
   },
   {
@@ -89,6 +97,7 @@ export const LANGUAGES: LanguageDef[] = [
       classes: "(class_declaration name: (identifier) @name) @def",
       interfaces: "(interface_declaration name: (identifier) @name) @def",
       methods: "(method_declaration name: (identifier) @name) @def",
+      refs: "(identifier) @ref",
     },
   },
   {
@@ -97,6 +106,7 @@ export const LANGUAGES: LanguageDef[] = [
     exts: [".rs"],
     queries: {
       functions: "(function_item name: (identifier) @name) @def",
+      refs: "[(identifier) (type_identifier)] @ref",
     },
   },
 ];
