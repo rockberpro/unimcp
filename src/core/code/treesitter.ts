@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Parser, Language } from "web-tree-sitter";
 import type { LanguageDef } from "./languages.js";
@@ -8,33 +9,28 @@ import type { LanguageDef } from "./languages.js";
 let initPromise: Promise<void> | null = null;
 const cache = new Map<string, Language>();
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
 function findWasmDir(): string {
-  const candidates = [
-    resolve(HERE, "../../../node_modules/tree-sitter-wasms/out"),
-    resolve(HERE, "../../../../node_modules/tree-sitter-wasms/out"),
-    resolve(process.cwd(), "node_modules/tree-sitter-wasms/out"),
-  ];
-  for (const c of candidates) if (existsSync(c)) return c;
-  throw new Error(
-    "Could not locate tree-sitter-wasms. Install with: npm i tree-sitter-wasms web-tree-sitter",
-  );
+  try {
+    const pkgJson = require.resolve("tree-sitter-wasms/package.json");
+    return join(dirname(pkgJson), "out");
+  } catch {
+    throw new Error(
+      "Could not locate tree-sitter-wasms. Install with: npm i tree-sitter-wasms web-tree-sitter",
+    );
+  }
 }
 
 function findRuntimeWasm(): string {
-  const dirs = [
-    resolve(HERE, "../../../node_modules/web-tree-sitter"),
-    resolve(HERE, "../../../../node_modules/web-tree-sitter"),
-    resolve(process.cwd(), "node_modules/web-tree-sitter"),
-  ];
-  const names = ["tree-sitter.wasm", "web-tree-sitter.wasm"];
-  for (const dir of dirs) {
-    for (const name of names) {
-      const p = join(dir, name);
+  try {
+    const pkgJson = require.resolve("web-tree-sitter/package.json");
+    const pkgDir = dirname(pkgJson);
+    for (const name of ["tree-sitter.wasm", "web-tree-sitter.wasm"]) {
+      const p = join(pkgDir, name);
       if (existsSync(p)) return p;
     }
-  }
+  } catch {}
   throw new Error("Could not locate web-tree-sitter runtime wasm");
 }
 
