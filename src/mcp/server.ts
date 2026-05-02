@@ -4,6 +4,7 @@ import { loadConfig, type CliFlags } from "./config.js";
 import { createJail } from "./jail.js";
 import { registerCoreTools } from "../core/tools/index.js";
 import { registerCodeTools } from "../core/code/tools.js";
+import { registerAstTools } from "../core/code/ast-tools.js";
 import { detectAndLoadPlugins } from "../adapters/detect.js";
 import { SymbolCache } from "../core/code/cache.js";
 import type { ServerContext } from "./context.js";
@@ -33,6 +34,7 @@ export async function startServer(flags: CliFlags): Promise<void> {
 
   registerCoreTools(server, ctx);
   registerCodeTools(server, ctx);
+  registerAstTools(server, ctx);
   await detectAndLoadPlugins(server, ctx);
 
   const transport = new StdioServerTransport();
